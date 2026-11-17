@@ -11,7 +11,29 @@ const fs = require('fs');
 dotenv.config();
 
 const app = express();
-app.use(cors());
+
+// Configure CORS for local development and Vercel production deployments
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  process.env.CLIENT_URL,
+].filter(Boolean);
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin (mobile apps, curl, health checks)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+        return callback(null, true);
+      }
+      // Fallback allows any origin to avoid CORS blocking across preview domains
+      return callback(null, true);
+    },
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
 // Ensure uploads directory exists
@@ -23,8 +45,11 @@ if (!fs.existsSync(uploadsDir)) {
 // Serve uploads folder statically
 app.use('/uploads', express.static(uploadsDir));
 
-// Serve static files from React build directory
-app.use(express.static(path.join(__dirname, '../client/build')));
+// Serve static files from React build directory if present (e.g. monolithic local run)
+const frontendBuildPath = path.join(__dirname, '../frontend/build');
+if (fs.existsSync(frontendBuildPath)) {
+  app.use(express.static(frontendBuildPath));
+}
 
 // Connect to MongoDB
 let isDbConnected = false;
@@ -444,13 +469,35 @@ app.delete('/api/wallpapers/:id', optionalAuthenticate, async (req, res) => {
   }
 });
 
-// Catch-all handler for client-side React routing
+// Root route: API Status (useful for Render deployment verification)
+app.get('/', (req, res) => {
+  res.json({
+    name: 'DreamWall AI Wallpaper Generator API',
+    status: 'online',
+    database: isDbConnected ? 'connected' : 'offline',
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      health: 'GET /api/health',
+      wallpapers: 'GET /api/wallpapers',
+      generate: 'POST /api/generate-wallpaper',
+      signup: 'POST /api/signup',
+      signin: 'POST /api/signin',
+    },
+    message: 'Backend is active. Connect your Vercel frontend via REACT_APP_API_URL.',
+  });
+});
+
+// Catch-all handler: serves React app if local build exists, or returns 404 JSON
 app.get('*', (req, res) => {
-  const indexPath = path.join(__dirname, '../client/build/index.html');
+  const indexPath = path.join(frontendBuildPath, 'index.html');
   if (fs.existsSync(indexPath)) {
     res.sendFile(indexPath);
   } else {
-    res.send('DreamWall API is active. Please run the React client on port 3000 or build the client.');
+    res.status(404).json({
+      error: 'Not Found',
+      message: 'Route not found on DreamWall Backend. If this is a client route, view your Vercel frontend URL.',
+      healthCheck: '/api/health',
+    });
   }
 });
 

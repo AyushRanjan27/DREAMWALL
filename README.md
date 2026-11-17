@@ -1,140 +1,138 @@
-# Prompt Wallpaper Creation
+# DreamWall - AI Wallpaper Generator
 
-A MERN stack web application that allows users to generate custom wallpapers based on text prompts using AI, with full authentication support.
+A full-stack MERN (MongoDB, Express, React, Node.js) web application that empowers users to generate high-resolution custom wallpapers based on text prompts using generative AI, with user authentication and personal wallpaper galleries.
+
+---
+
+## Folder Structure
+
+The project is structured with a decoupled **frontend** and **backend** architecture, optimized for independent deployment to **Vercel** and **Render**:
+
+```
+DREAMWALL/
+├── frontend/               # React 18 Single Page Application (Deploy to Vercel)
+│   ├── public/             # Static public assets (HTML, favicons)
+│   ├── src/                # React components, styles, and API integrations
+│   │   ├── App.js          # Core app component & dynamic API URL routing
+│   │   ├── AppDesign.css   # Main stylesheet & themes
+│   │   └── index.js        # React DOM entry point
+│   ├── .env.example        # Environment variables template for frontend
+│   ├── vercel.json         # Vercel configuration for SPA rewrites
+│   └── package.json        # Frontend dependencies & scripts
+│
+├── backend/                # Express & Node.js REST API (Deploy to Render)
+│   ├── models/             # Mongoose database models
+│   │   ├── User.js         # User model with bcrypt password hashing
+│   │   └── Wallpaper.js    # Wallpaper model with prompts & metadata
+│   ├── uploads/            # Generated wallpaper images
+│   ├── .env.example        # Environment variables template for backend
+│   ├── render.yaml         # Render Blueprint configuration
+│   ├── server.js           # Express server, CORS & REST endpoints
+│   └── package.json        # Backend dependencies & scripts
+│
+├── BUILD_CLIENT.bat        # Helper script to build frontend production bundle
+├── START_DEV.bat           # Helper script to start both dev servers concurrently
+├── START_SERVER.bat        # Helper script to start backend server locally
+├── DEPLOYMENT.md           # Step-by-step Vercel + Render deployment instructions
+├── QUICK_START.md          # Local developer quick-start guide
+└── package.json            # Root monorepo scripts (concurrent dev runner)
+```
+
+---
 
 ## Features
 
-- **User Authentication**: Sign up and sign in with email/password
-- **Wallpaper Generation**: Input text prompts to create AI-generated wallpapers using OpenAI's DALL-E
-- **Wallpaper Gallery**: View all previously generated wallpapers
-- **Download Functionality**: Download wallpapers directly from the app
-- **Profile Management**: Manage your profile, picture, and account settings
-- **Email/Phone Verification**: Verify your account with email and phone verification
-- **Password Security**: Change your password with validation
-- **MongoDB Storage**: Save prompts and generated image URLs with user authentication
-- **Responsive Design**: Works on desktop and mobile devices
-- **Dark/Light Theme**: Toggle between dark and light themes
+- **AI Generative Engines**:
+  - **FLUX & Pollinations AI** (Default, free, high quality, no API keys required!)
+  - **OpenAI DALL-E 3** (Optional via `OPENAI_API_KEY`)
+  - **Hugging Face FLUX.1-schnell** (Optional via `HF_TOKEN`)
+  - **Multiple Aspect Ratios**: 16:9 (Desktop), 9:16 (Phone), 1:1 (Square), 21:9 (Ultrawide)
+- **User Authentication & Accounts**:
+  - Sign up & Sign in with secure bcrypt password hashing and JWT sessions
+  - Guest mode: visitors can generate wallpapers without signing in
+  - User profiles with custom avatars and preferences
+- **Personal & Community Gallery**:
+  - Browse community creations and personal generation history
+  - Direct 1-click downloads
+- **Theming & Design**:
+  - Dark/Light mode toggle
+  - Responsive layout for desktop, tablets, and smartphones
 
-## Tech Stack
+---
 
-- **Frontend**: React.js with Axios for API calls
-- **Backend**: Node.js, Express.js
-- **Database**: MongoDB with Mongoose
-- **Authentication**: JWT (JSON Web Tokens) with bcrypt password hashing
-- **AI**: OpenAI DALL-E API
+## Local Development
 
-## Setup Instructions
+### 1. Prerequisites
+- **Node.js** (v18 or higher)
+- **MongoDB** running locally (`mongodb://localhost:27017/wallpaperdb`) or a free [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) cluster
 
-### Prerequisites
-- Node.js (v14 or higher)
-- MongoDB (running locally on port 27017, or a remote MongoDB URI)
-- OpenAI API Key
-- Git
-
-### Installation
-
-1. **Clone/Navigate to the Project**:
-   ```bash
-   cd path/to/MEAN
-   ```
-
-2. **Install Server Dependencies**:
-   ```bash
-   cd server
-   npm install
-   cd ..
-   ```
-
-3. **Install Client Dependencies**:
-   ```bash
-   cd client
-   npm install
-   cd ..
-   ```
-
-4. **Set up Environment Variables**:
-   
-   Create/Update `server/.env`:
-   ```
-   MONGODB_URI=mongodb://localhost:27017/wallpaperdb
-   OPENAI_API_KEY=your_openai_api_key_here
-   PORT=5000
-   JWT_SECRET=your_jwt_secret_key_change_this_in_production
-   ```
-
-   Ensure MongoDB is running locally on port 27017 or update `MONGODB_URI` with your MongoDB connection string.
-
-5. **Build the Client**:
-   ```bash
-   cd client
-   npm run build
-   cd ..
-   ```
-
-## Running the Application
-
-### Option 1: Run Server Only (for development with separate React dev server)
-
-**Terminal 1 - Start the Backend Server**:
+### 2. Install Dependencies
+From the root directory:
 ```bash
-cd server
-npm start
-# Server will be available at http://localhost:5000
+npm run install-all
 ```
+*(Or install manually: `cd backend && npm install && cd ../frontend && npm install`)*
 
-**Terminal 2 - Start the React Development Server**:
+### 3. Configure Environment Variables
+- Copy `backend/.env.example` to `backend/.env` and update values if needed:
+  ```env
+  PORT=5000
+  MONGODB_URI=mongodb://localhost:27017/wallpaperdb
+  JWT_SECRET=your_jwt_secret_key
+  CLIENT_URL=http://localhost:3000
+  ```
+- Copy `frontend/.env.example` to `frontend/.env` (optional for local dev, defaults to `http://localhost:5000`):
+  ```env
+  REACT_APP_API_URL=http://localhost:5000
+  ```
+
+### 4. Run Locally
+Run both backend and frontend concurrently:
 ```bash
-cd client
-npm start
-# React dev server will be available at http://localhost:3000
+npm run dev
 ```
+*(On Windows, you can simply double-click `START_DEV.bat`)*
 
-### Option 2: Run Server with Built Client (production mode)
+- **Frontend**: [http://localhost:3000](http://localhost:3000)
+- **Backend API**: [http://localhost:5000](http://localhost:5000)
+- **API Health Check**: [http://localhost:5000/api/health](http://localhost:5000/api/health)
 
-The server is configured to serve the built React application:
+---
 
-```bash
-cd server
-npm start
-# Full application available at http://localhost:5000
-```
+## Deployment to Vercel & Render
 
-For this to work, ensure the client has been built:
-```bash
-cd client
-npm run build
-```
+For detailed step-by-step instructions with screenshots and MongoDB Atlas setup, see **[DEPLOYMENT.md](DEPLOYMENT.md)**.
 
-## Usage
+### Quick Summary
 
-1. **Create an Account**:
-   - Click "Sign Up" on the homepage
-   - Enter your name, email, and password
-   - Your account will be created and ready to use
+#### Backend on Render:
+1. Create a **Web Service** on [Render](https://render.com).
+2. Set **Root Directory** to `backend`.
+3. Set **Build Command** to `npm install`.
+4. Set **Start Command** to `npm start`.
+5. Set Environment Variables:
+   - `MONGODB_URI`: Your MongoDB Atlas URI
+   - `JWT_SECRET`: Random 32+ character secret
+   - `CLIENT_URL`: `https://your-frontend.vercel.app` (optional, can be added after frontend deployment)
 
-2. **Sign In**:
-   - Enter your email and password
-   - You'll be authenticated and redirected to the home page
+#### Frontend on Vercel:
+1. Create a **New Project** on [Vercel](https://vercel.com).
+2. Set **Framework Preset** to `Create React App`.
+3. Set **Root Directory** to `frontend`.
+4. Add Environment Variable:
+   - `REACT_APP_API_URL`: Your Render backend URL (e.g., `https://dreamwall-backend.onrender.com`, NO trailing slash).
+5. Click **Deploy**.
 
-3. **Generate Wallpapers**:
-   - Enter a descriptive prompt (e.g., "a serene mountain landscape at sunset")
-   - Click "Generate Wallpaper"
-   - View the AI-generated image
-
-4. **Browse Gallery**:
-   - Click "Wallpaper Gallery" to view all generated wallpapers
-   - See prompts and images in a grid layout
-
-3. **Download Wallpapers**:
-   - Click "Download" button on any wallpaper to save it locally
+---
 
 ## API Endpoints
 
-- `POST /api/generate-wallpaper`: Generate a new wallpaper from a prompt
-- `GET /api/wallpapers`: Retrieve all stored wallpapers
-
-## Notes
-
-- Requires an OpenAI API key with credits for DALL-E usage
-- Images are generated at 1024x1024 resolution
-- Wallpapers are stored in MongoDB for gallery viewing
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| `GET` | `/` | API status and directory | No |
+| `GET` | `/api/health` | Health and database status | No |
+| `POST` | `/api/signup` | Register a new user | No |
+| `POST` | `/api/signin` | Sign in with email and password | No |
+| `POST` | `/api/generate-wallpaper` | Generate a wallpaper image from prompt | Optional |
+| `GET` | `/api/wallpapers` | Fetch recent wallpapers gallery | No |
+| `DELETE` | `/api/wallpapers/:id` | Delete a wallpaper | Bearer Token |

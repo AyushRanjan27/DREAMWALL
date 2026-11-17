@@ -1,19 +1,19 @@
 @echo off
-REM Build Script for DreamWall Client
+REM Build Script for DreamWall Frontend
 
 echo.
 echo ================================
-echo  Building DreamWall Client
+echo  Building DreamWall Frontend
 echo ================================
 echo.
 
-cd client
+cd frontend
 
-echo Installing dependencies...
+echo Installing frontend dependencies...
 call npm install
 
 if errorlevel 1 (
-    echo ERROR: Failed to install dependencies
+    echo ERROR: Failed to install frontend dependencies
     pause
     exit /b 1
 )
@@ -33,8 +33,7 @@ echo ================================
 echo  Build completed successfully!
 echo ================================
 echo.
-echo The client is now ready to be served by the server.
-echo To start the server, run: START_SERVER.bat
+echo The frontend build is ready in frontend/build
 echo.
 cd ..
 pause

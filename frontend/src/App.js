@@ -2,7 +2,10 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import axios from 'axios';
 import './AppDesign.css';
 
-const API_BASE_URL = window.location.port === '3000' ? 'http://localhost:5000' : '';
+const API_BASE_URL = (
+  process.env.REACT_APP_API_URL ||
+  (window.location.port === '3000' ? 'http://localhost:5000' : '')
+).replace(/\/+$/, '');
 
 function App() {
   const [prompt, setPrompt] = useState('');

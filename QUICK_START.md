@@ -97,7 +97,20 @@ This will open:
 
 ## Configuration
 
-### Server Configuration (server/.env)
+### Server Configuration (backend/.env)
+```env
+PORT=5000
+MONGODB_URI=mongodb://localhost:27017/wallpaperdb
+JWT_SECRET=your_jwt_secret_key_change_this_in_production
+CLIENT_URL=http://localhost:3000
+OPENAI_API_KEY=sk-... (optional)
+HF_TOKEN=hf_... (optional)
+```
+
+### Client Configuration (frontend/.env)
+```env
+REACT_APP_API_URL=http://localhost:5000
+```
 ```
 MONGODB_URI=mongodb://localhost:27017/wallpaperdb
 OPENAI_API_KEY=your_openai_api_key_here
@@ -118,28 +131,29 @@ JWT_SECRET=your_jwt_secret_key_change_this_in_production
 ## File Structure
 
 ```
-MEAN/
-├── client/                 # React frontend
+DREAMWALL/
+├── frontend/              # React frontend (Ready for Vercel deployment)
 │   ├── src/
-│   │   ├── App.js         # Main React component (FIXED ✓)
-│   │   ├── App.css        # Styles
-│   │   └── index.js       # Entry point
-│   ├── build/             # Production build (after npm run build)
+│   │   ├── App.js         # Main React component (dynamic API URL)
+│   │   ├── AppDesign.css  # Styles
+│   │   └── index.js       # React entry point
 │   ├── public/
 │   │   └── index.html
+│   ├── vercel.json        # Vercel SPA routing configuration
+│   ├── .env.example       # Frontend environment template
 │   └── package.json
-├── server/                # Node.js/Express backend
-│   ├── server.js          # Main server file (UPDATED ✓)
-│   ├── models/            # Database models
-│   │   ├── User.js        # User model with auth
-│   │   └── Wallpaper.js   # Wallpaper model
-│   ├── .env               # Environment config (UPDATED ✓)
+├── backend/               # Node.js/Express backend (Ready for Render deployment)
+│   ├── server.js          # Express server with CORS & API routes
+│   ├── models/            # Mongoose models (User, Wallpaper)
+│   ├── uploads/           # Generated wallpaper assets
+│   ├── render.yaml        # Render Blueprint definition
+│   ├── .env.example       # Backend environment template
 │   └── package.json
-├── BUILD_CLIENT.bat       # NEW: Build script
-├── START_SERVER.bat       # NEW: Production startup
-├── START_DEV.bat         # NEW: Development startup
-└── README.md             # UPDATED ✓
-
+├── BUILD_CLIENT.bat       # Build frontend locally
+├── START_DEV.bat          # Start both backend & frontend concurrently
+├── START_SERVER.bat       # Start backend server
+├── DEPLOYMENT.md          # Step-by-step Vercel + Render deployment guide
+└── README.md              # Project documentation
 ```
 
 ---
@@ -147,45 +161,31 @@ MEAN/
 ## Troubleshooting
 
 ### Server won't start
-- Check if MongoDB is running: `mongod`
-- Verify `.env` file exists in `server/` directory
+- Check if MongoDB is running locally or your Atlas connection string in `backend/.env` is correct
+- Verify `.env` file exists in `backend/` directory
 - Check if port 5000 is already in use
 
 ### Client won't load
-- Ensure client has been built: `npm run build` in `client/`
-- Check browser console for errors (F12)
-- Verify server is running on port 5000
+- In development: Ensure frontend dev server is running on port 3000 (`npm run frontend`)
+- In production: Ensure frontend is built with `npm run build-frontend`
+- Check browser console for network errors (F12)
+- Verify `REACT_APP_API_URL` points to the running backend (defaulting to `http://localhost:5000` locally)
 
 ### Authentication not working
 - Check browser's Local Storage (F12 → Application → Local Storage)
-- Verify JWT_SECRET is set in `.env`
+- Verify `JWT_SECRET` is set in `backend/.env`
 - Check server console for error messages
 
-### OpenAI API errors
-- Verify OPENAI_API_KEY is set correctly in `.env`
-- Check API key is valid at https://platform.openai.com
-- Check API usage and quotas
-
----
-
-## Build Status
-
-✓ **Client**: Compiled successfully (0 errors)
-✓ **Server**: Syntax valid, ready to run
-✓ **Dependencies**: All installed
-✓ **Features**: Authentication working
-✓ **Production Ready**: Yes
+### Deployment Issues (Vercel & Render)
+- Consult `DEPLOYMENT.md` for exact settings, build commands, and environment variables.
 
 ---
 
 ## Next Steps
 
-1. Build the client: `BUILD_CLIENT.bat`
-2. Configure your API keys in `server/.env`
-3. Start the server: `START_SERVER.bat`
-4. Open `http://localhost:5000` in your browser
-5. Sign up for a new account
-6. Start generating wallpapers!
+1. Configure environment variables in `backend/.env` (and `frontend/.env` if deploying)
+2. Run locally in dev mode: double-click `START_DEV.bat` (or run `npm run dev`)
+3. Follow `DEPLOYMENT.md` to deploy `frontend/` to Vercel and `backend/` to Render!
 
 ---
 
